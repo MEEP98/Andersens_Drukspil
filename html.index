@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PICCOLO 2.0 💀🍺</title>
+<title>Andersens Drukspil 💀🍺</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -544,9 +544,9 @@
 
 <!-- TITLE SCREEN -->
 <div id="screen-title" class="screen active">
-  <div class="logo">PICCOLO<br><span style="font-size:0.45em; color: var(--gold);">2.0</span></div>
+  <div class="logo">Andersens Drukspil<br><span style="font-size:0.45em; color: var(--gold);">2.0</span></div>
   <div class="logo-sub">Drukspil</div>
-  <p class="tagline">Det Piccolo aldrig turde</p>
+  <p class="tagline">Det kan noget!</p>
   <button class="btn" onclick="showScreen('screen-setup')">START SPILLET 🍺</button>
   <button class="btn btn-ghost" style="margin-top: 8px;" onclick="showRules()">Regler & Gamemodes</button>
 </div>
@@ -634,7 +634,7 @@
 <div class="overlay" id="rules-overlay" onclick="closeOverlay(event)">
   <div class="popup">
     <h2>📖 REGLER</h2>
-    <p><strong>Piccolo 2.0</strong> er som Piccolo, bare med sjæl.</p>
+    <p><strong>Andersens Drukspil/strong>Det kan noget!</p>
     <p>🍺 Brug shots, sutteklud, eller hvad I nu har.</p>
     <p>💀 <strong>Drik-tal</strong> = antal slurke/shots angivet på kortet.</p>
     <p>🔥 <strong>HOT-mode</strong> er for stærke sjæle. Alt kan ske.</p>
