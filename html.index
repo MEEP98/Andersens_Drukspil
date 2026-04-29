@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PICCOLO 2.0 💀🍺</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --card: #161616;
+    --accent: #ff3c00;
+    --gold: #ffd700;
+    --neon: #00ffcc;
+    --text: #f0f0f0;
+    --muted: #888;
+    --danger: #ff0055;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NOISE TEXTURE */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  h1, h2, h3 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px; }
+
+  /* ===== SCREENS ===== */
+  .screen { display: none; position: relative; z-index: 1; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+
+  /* ===== TITLE SCREEN ===== */
+  #screen-title {
+    background: radial-gradient(ellipse at 50% 30%, #2a0a00 0%, #0d0d0d 70%);
+    text-align: center;
+    gap: 30px;
+  }
+
+  .logo {
+    font-size: clamp(60px, 18vw, 130px);
+    color: var(--accent);
+    text-shadow: 0 0 40px rgba(255,60,0,0.5), 0 0 80px rgba(255,60,0,0.2);
+    line-height: 0.9;
+    animation: flicker 4s infinite;
+  }
+
+  .logo-sub {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(18px, 5vw, 36px);
+    color: var(--gold);
+    letter-spacing: 8px;
+    text-shadow: 0 0 20px rgba(255,215,0,0.4);
+  }
+
+  .tagline {
+    color: var(--muted);
+    font-size: 14px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: -10px;
+  }
+
+  @keyframes flicker {
+    0%,100% { opacity: 1; }
+    92% { opacity: 1; }
+    93% { opacity: 0.7; }
+    94% { opacity: 1; }
+    96% { opacity: 0.8; }
+    97% { opacity: 1; }
+  }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 14px 40px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .btn:hover { background: #ff6a00; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,60,0,0.4); }
+  .btn:active { transform: translateY(0); }
+
+  .btn-ghost {
+    background: transparent;
+    border: 2px solid var(--muted);
+    color: var(--muted);
+    clip-path: none;
+    border-radius: 4px;
+    font-size: 16px;
+    padding: 10px 24px;
+  }
+  .btn-ghost:hover { border-color: var(--text); color: var(--text); background: transparent; }
+
+  .btn-neon {
+    background: transparent;
+    border: 2px solid var(--neon);
+    color: var(--neon);
+    clip-path: none;
+    text-shadow: 0 0 10px var(--neon);
+    box-shadow: 0 0 15px rgba(0,255,204,0.15);
+  }
+  .btn-neon:hover { background: rgba(0,255,204,0.08); box-shadow: 0 0 30px rgba(0,255,204,0.3); }
+
+  .btn-gold {
+    background: linear-gradient(135deg, #ffd700, #ff9500);
+    color: #000;
+  }
+  .btn-gold:hover { background: linear-gradient(135deg, #ffe033, #ffaa00); }
+
+  /* ===== PLAYER SETUP ===== */
+  #screen-setup { gap: 24px; max-width: 500px; width: 100%; }
+
+  .setup-title {
+    font-size: 42px;
+    color: var(--text);
+    text-align: center;
+  }
+  .setup-title span { color: var(--accent); }
+
+  .player-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    width: 100%;
+  }
+
+  .player-tag {
+    background: var(--card);
+    border: 1px solid #333;
+    color: var(--text);
+    padding: 10px 16px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 15px;
+    flex: 1;
+    outline: none;
+    border-radius: 4px;
+    transition: border-color 0.2s;
+  }
+  .player-tag:focus { border-color: var(--accent); }
+
+  .remove-btn {
+    background: #2a0a00;
+    border: none;
+    color: var(--accent);
+    font-size: 20px;
+    width: 36px; height: 36px;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .remove-btn:hover { background: #4a0f00; }
+
+  #player-list { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+
+  .add-player-btn {
+    width: 100%;
+    background: transparent;
+    border: 2px dashed #333;
+    color: var(--muted);
+    padding: 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 15px;
+    transition: all 0.2s;
+  }
+  .add-player-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* MODE SELECTOR */
+  .mode-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .mode-card {
+    background: var(--card);
+    border: 2px solid #2a2a2a;
+    padding: 14px 12px;
+    cursor: pointer;
+    border-radius: 6px;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .mode-card:hover { border-color: #555; }
+  .mode-card.selected { border-color: var(--accent); background: rgba(255,60,0,0.08); }
+  .mode-card .mode-icon { font-size: 28px; display: block; margin-bottom: 6px; }
+  .mode-card .mode-name { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 1px; color: var(--text); }
+  .mode-card .mode-desc { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.3; }
+
+  /* ===== GAME SCREEN ===== */
+  #screen-game {
+    justify-content: flex-start;
+    padding-top: 0;
+    gap: 0;
+  }
+
+  .game-topbar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: rgba(0,0,0,0.6);
+    border-bottom: 1px solid #1f1f1f;
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .topbar-mode {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: var(--accent);
+  }
+
+  .topbar-players {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .player-chip {
+    background: #222;
+    border: 1px solid #333;
+    color: var(--text);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .player-chip.active { border-color: var(--gold); color: var(--gold); background: rgba(255,215,0,0.08); }
+
+  .topbar-round {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* CARD AREA */
+  .card-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    width: 100%;
+    perspective: 1000px;
+  }
+
+  .game-card {
+    background: var(--card);
+    border: 1px solid #2a2a2a;
+    border-radius: 16px;
+    max-width: 420px;
+    width: 100%;
+    padding: 36px 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    animation: cardIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: rotateY(-15deg) scale(0.9) translateY(20px); }
+    to   { opacity: 1; transform: rotateY(0deg) scale(1) translateY(0); }
+  }
+
+  .card-stripe {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+  }
+
+  .card-category {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 4px;
+    margin-bottom: 16px;
+    opacity: 0.7;
+  }
+
+  .card-player {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(26px, 7vw, 42px);
+    margin-bottom: 18px;
+    line-height: 1;
+  }
+
+  .card-text {
+    font-size: clamp(16px, 4vw, 22px);
+    line-height: 1.5;
+    color: var(--text);
+    font-weight: 400;
+  }
+
+  .card-text strong { color: var(--accent); font-weight: 700; }
+
+  .card-drinks {
+    margin-top: 22px;
+    background: rgba(255,60,0,0.1);
+    border: 1px solid rgba(255,60,0,0.3);
+    border-radius: 8px;
+    padding: 12px 20px;
+    display: inline-block;
+  }
+
+  .drinks-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .drinks-count {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .card-bottom {
+    padding: 20px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .next-btn {
+    width: 100%;
+    max-width: 420px;
+    padding: 18px;
+    font-size: 26px;
+  }
+
+  /* SPECIAL CARD TYPES */
+  .card-type-challenge .card-stripe { background: linear-gradient(90deg, #ff3c00, #ff9500); }
+  .card-type-challenge .card-category { color: #ff9500; }
+  .card-type-truth .card-stripe { background: linear-gradient(90deg, #00ffcc, #00aaff); }
+  .card-type-truth .card-category { color: var(--neon); }
+  .card-type-dare .card-stripe { background: linear-gradient(90deg, #ff0055, #aa00ff); }
+  .card-type-dare .card-category { color: #ff0055; }
+  .card-type-rule .card-stripe { background: linear-gradient(90deg, #ffd700, #ff9500); }
+  .card-type-rule .card-category { color: var(--gold); }
+  .card-type-vote .card-stripe { background: linear-gradient(90deg, #aa00ff, #ff0055); }
+  .card-type-vote .card-category { color: #cc44ff; }
+  .card-type-punishment .card-stripe { background: linear-gradient(90deg, #ff0055, #ff3c00); }
+  .card-type-punishment .card-category { color: var(--danger); }
+
+  /* ===== RULES POPUP ===== */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+  .overlay.show { display: flex; }
+
+  .popup {
+    background: var(--card);
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 400px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .popup h2 { font-size: 32px; color: var(--gold); margin-bottom: 16px; }
+  .popup p { color: var(--muted); font-size: 14px; line-height: 1.7; margin-bottom: 10px; }
+  .popup strong { color: var(--text); }
+
+  .rule-badge {
+    display: inline-block;
+    background: rgba(255,215,0,0.1);
+    border: 1px solid rgba(255,215,0,0.3);
+    color: var(--gold);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    font-family: 'Bebas Neue', sans-serif;
+    margin-bottom: 12px;
+  }
+
+  .active-rules-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .active-rule-item {
+    background: rgba(255,215,0,0.06);
+    border: 1px solid rgba(255,215,0,0.15);
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .remove-rule-btn {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  /* ENDGAME */
+  #screen-end {
+    gap: 30px;
+    text-align: center;
+    background: radial-gradient(ellipse at 50% 50%, #1a0a00 0%, #0d0d0d 70%);
+  }
+
+  .end-title { font-size: clamp(50px, 15vw, 90px); color: var(--accent); text-shadow: 0 0 40px rgba(255,60,0,0.4); }
+  .end-sub { font-size: 20px; color: var(--muted); letter-spacing: 4px; }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .stat-box {
+    background: var(--card);
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--accent); }
+  .stat-label { font-size: 11px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .winner-box {
+    background: rgba(255,215,0,0.05);
+    border: 2px solid var(--gold);
+    border-radius: 10px;
+    padding: 20px 30px;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .winner-label { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 4px; color: var(--gold); }
+  .winner-name { font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: var(--text); margin-top: 4px; }
+  .winner-desc { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  /* RESPONSIVE */
+  @media(max-width: 400px) {
+    .mode-grid { grid-template-columns: 1fr; }
+    .game-card { padding: 24px 18px; }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #222;
+    border: 1px solid #444;
+    color: var(--text);
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 14px;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 200;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* INTENSITY METER */
+  .intensity-bar {
+    width: 100%;
+    max-width: 420px;
+    height: 4px;
+    background: #1f1f1f;
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 0 auto;
+  }
+  .intensity-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff9500, #ff3c00, #ff0055);
+    transition: width 1s ease;
+    border-radius: 2px;
+  }
+</style>
+</head>
+<body>
+
+<!-- TITLE SCREEN -->
+<div id="screen-title" class="screen active">
+  <div class="logo">PICCOLO<br><span style="font-size:0.45em; color: var(--gold);">2.0</span></div>
+  <div class="logo-sub">Drukspil</div>
+  <p class="tagline">Det Piccolo aldrig turde</p>
+  <button class="btn" onclick="showScreen('screen-setup')">START SPILLET 🍺</button>
+  <button class="btn btn-ghost" style="margin-top: 8px;" onclick="showRules()">Regler & Gamemodes</button>
+</div>
+
+<!-- SETUP SCREEN -->
+<div id="screen-setup" class="screen">
+  <h2 class="setup-title"><span>SPILLERE</span></h2>
+
+  <div id="player-list"></div>
+  <button class="add-player-btn" onclick="addPlayerInput()">+ Tilføj spiller</button>
+
+  <div style="width:100%; text-align:left; margin-top:16px;">
+    <h3 style="font-size:20px; color:var(--muted); letter-spacing:2px; margin-bottom:12px;">VÆLG GAMEMODE</h3>
+  </div>
+
+  <div class="mode-grid">
+    <div class="mode-card selected" onclick="selectMode(this, 'klassisk')" data-mode="klassisk">
+      <span class="mode-icon">🍺</span>
+      <div class="mode-name">Klassisk</div>
+      <div class="mode-desc">Alt muligt – fra sjovt til stødende</div>
+    </div>
+    <div class="mode-card" onclick="selectMode(this, 'hot')" data-mode="hot">
+      <span class="mode-icon">🔥</span>
+      <div class="mode-name">HOT HOT HOT</div>
+      <div class="mode-desc">Grænseoverskridende & ubehageligt</div>
+    </div>
+    <div class="mode-card" onclick="selectMode(this, 'spion')" data-mode="spion">
+      <span class="mode-icon">🕵️</span>
+      <div class="mode-name">SPION</div>
+      <div class="mode-desc">Hemmeligheder, løgne & afsløringer</div>
+    </div>
+    <div class="mode-card" onclick="selectMode(this, 'kaos')" data-mode="kaos">
+      <span class="mode-icon">💀</span>
+      <div class="mode-name">FULDSTÆNDIG KAOS</div>
+      <div class="mode-desc">Ingen regler. Ren anarkistisk fun</div>
+    </div>
+  </div>
+
+  <button class="btn btn-gold" onclick="startGame()" style="width:100%; max-width:500px; margin-top:8px;">
+    LAD OS SMADRE OS →
+  </button>
+  <button class="btn btn-ghost" onclick="showScreen('screen-title')">← Tilbage</button>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="screen-game" class="screen">
+  <div class="game-topbar">
+    <div class="topbar-mode" id="topbar-mode-label">KLASSISK</div>
+    <div class="topbar-players" id="topbar-players"></div>
+    <div class="topbar-round" id="topbar-round">RND 1</div>
+  </div>
+
+  <div style="width:100%; padding: 8px 20px 0;">
+    <div class="intensity-bar"><div class="intensity-fill" id="intensity-fill" style="width:5%"></div></div>
+  </div>
+
+  <div class="card-area" id="card-area">
+    <!-- Card injected here -->
+  </div>
+
+  <div class="card-bottom">
+    <button class="btn next-btn" onclick="nextCard()">NÆSTE KORT 🃏</button>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-ghost" onclick="showActiveRules()" style="font-size:14px; padding:8px 16px;">Regler 📜</button>
+      <button class="btn btn-ghost" onclick="confirmEnd()" style="font-size:14px; padding:8px 16px;">Afslut</button>
+    </div>
+  </div>
+</div>
+
+<!-- END SCREEN -->
+<div id="screen-end" class="screen">
+  <div class="end-title">GAME<br>OVER</div>
+  <div class="end-sub">I ER ALLE TABERE 🏆</div>
+
+  <div class="stats-grid" id="stats-grid"></div>
+  <div class="winner-box" id="winner-box"></div>
+
+  <div style="display:flex; flex-direction:column; gap:10px; width:100%; max-width:400px;">
+    <button class="btn" onclick="restartSame()" style="width:100%">SPIL IGEN 🔄</button>
+    <button class="btn btn-ghost" onclick="showScreen('screen-title')" style="width:100%">Forside</button>
+  </div>
+</div>
+
+<!-- RULES OVERLAY -->
+<div class="overlay" id="rules-overlay" onclick="closeOverlay(event)">
+  <div class="popup">
+    <h2>📖 REGLER</h2>
+    <p><strong>Piccolo 2.0</strong> er som Piccolo, bare med sjæl.</p>
+    <p>🍺 Brug shots, sutteklud, eller hvad I nu har.</p>
+    <p>💀 <strong>Drik-tal</strong> = antal slurke/shots angivet på kortet.</p>
+    <p>🔥 <strong>HOT-mode</strong> er for stærke sjæle. Alt kan ske.</p>
+    <p>🕵️ <strong>SPION-mode</strong> handler om hemmeligheder og afsløringer.</p>
+    <p>💀 <strong>KAOS-mode</strong> blander det hele + ekstra straf.</p>
+    <p>📜 Nogle kort tilføjer <strong>aktive regler</strong> der gælder resten af spillet.</p>
+    <p style="color:var(--danger); font-size:12px; margin-top:16px;">⚠️ Drik ansvarligt. Vanddrikkere er velkomne. Men de taber morsomt.</p>
+    <button class="btn" onclick="document.getElementById('rules-overlay').classList.remove('show'); document.getElementById('rules-active-overlay').classList.remove('show');" style="margin-top:20px; width:100%;">LUK</button>
+  </div>
+</div>
+
+<!-- ACTIVE RULES OVERLAY -->
+<div class="overlay" id="rules-active-overlay" onclick="closeOverlay(event)">
+  <div class="popup">
+    <h2>📜 AKTIVE REGLER</h2>
+    <div id="active-rules-display"></div>
+    <button class="btn" onclick="document.getElementById('rules-active-overlay').classList.remove('show');" style="margin-top:20px; width:100%;">LUK</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let players = [];
+let selectedMode = 'klassisk';
+let currentPlayerIndex = 0;
+let round = 1;
+let drinkTotals = {};
+let activeRules = [];
+let cardsPlayed = 0;
+
+// ============================================================
+// CARD POOLS
+// ============================================================
+
+const klassiskKort = [
+  // CHALLENGE
+  { type: 'challenge', cat: '⚡ UDFORDRING', text: '{player} skal drikke {drinks} slurke for hvert minut de har brugt på toilettet i løbet af aftenen. Vurder selv. Vi ser om du lyver.', drinks: 2 },
+  { type: 'challenge', cat: '⚡ UDFORDRING', text: 'Alle der har en ekskæreste/kæreste de stadig taler med drikker {drinks} slurke.', drinks: 2 },
+  { type: 'challenge', cat: '⚡ UDFORDRING', text: '{player} skal lave sit bedste {player2}-impression. Resten stemmer – er det godt? Nej? Drik {drinks}.', drinks: 3 },
+  { type: 'challenge', cat: '⚡ UDFORDRING', text: 'Hot Take: {player} siger noget de normalt aldrig ville sige. Hvis ingen er chokeret, drikker de {drinks}.', drinks: 2 },
+  { type: 'challenge', cat: '⚡ UDFORDRING', text: '{player} skal beskrive {player2} med kun 3 emojis. {player2} gætter – forkert? Begge drikker {drinks}.', drinks: 2 },
+  { type: 'challenge', cat: '⚡ UDFORDRING', text: 'Alle viser den seneste søgning på Google. Den mest pinlige drikker {drinks}.', drinks: 3 },
+  { type: 'challenge', cat: '⚡ UDFORDRING', text: '{player} skal synge starten af en sang. Hvis nogen kender den og kan synge videre, er du fri. Ellers {drinks} slurke.', drinks: 2 },
+  { type: 'challenge', cat: '⚡ UDFORDRING', text: 'Den person der sidder til venstre for {player} er på listen. De drikker {drinks}.', drinks: 2 },
+  { type: 'challenge', cat: '⚡ UDFORDRING', text: '{player} ringer til en kontakt fra A-B i telefonbogen og siger "Jeg har savnet dig". Nægter? {drinks} slurke.', drinks: 4 },
+  { type: 'challenge', cat: '⚡ UDFORDRING', text: 'TOMMELFINGERREGLEN: Alle der ER den drukne af gruppen drikker {drinks}.', drinks: 2 },
+
+  // TRUTH
+  { type: 'truth', cat: '🔍 SANDHED', text: '{player}: Hvad er den mest ydmygende ting der er sket dig i selskab? Svar ærligt eller drik {drinks}.', drinks: 3 },
+  { type: 'truth', cat: '🔍 SANDHED', text: '{player}: Har du nogensinde løjet om noget vigtigt over for en af de andre her? Ja = drik {drinks}. Nej og løj = vi ved det godt.', drinks: 2 },
+  { type: 'truth', cat: '🔍 SANDHED', text: '{player}: Hvem i lokalet ville du mindst invitere til din bryllupsfest? Du skal svare.', drinks: 0 },
+  { type: 'truth', cat: '🔍 SANDHED', text: '{player}: Hvad er din største insecurity? Ærligt svar eller {drinks} slurke.', drinks: 3 },
+  { type: 'truth', cat: '🔍 SANDHED', text: '{player}: Nævn noget du har gjort som du aldrig har fortalt din familie.', drinks: 0 },
+  { type: 'truth', cat: '🔍 SANDHED', text: 'Alle skriver hemmeligt hvem i gruppen de tror tjener mest. Afstem. Den forkerte drikker {drinks}.', drinks: 2 },
+  { type: 'truth', cat: '🔍 SANDHED', text: '{player}: Hvad er det vildeste du har gjort for kærlighed? Kedeligt svar = {drinks} straf.', drinks: 2 },
+
+  // DARE
+  { type: 'dare', cat: '💥 TØR DU', text: '{player} skal skrive en kringe tekst til en eks og vise den til alle. Send den? Fri bil. Send ikke? {drinks} slurke.', drinks: 4 },
+  { type: 'dare', cat: '💥 TØR DU', text: '{player} laver planken i 30 sekunder. Fejler? {drinks} slurke.', drinks: 2 },
+  { type: 'dare', cat: '💥 TØR DU', text: '{player} tager en selfie med den dyreste filter og sender til sidst set kontakt. Nægter? {drinks}.', drinks: 3 },
+  { type: 'dare', cat: '💥 TØR DU', text: '{player} skal lave en 15 sekunders dansevideo til en tilfældig sang. Alle stemmer – under 50% approval? {drinks} slurke.', drinks: 2 },
+  { type: 'dare', cat: '💥 TØR DU', text: '{player} skriver en anmeldelse på Google Maps til et sted de aldrig har besøgt. Mindst 4 stjerner og 2 sætninger.', drinks: 0 },
+
+  // VOTE
+  { type: 'vote', cat: '🗳️ AFSTEMNING', text: 'AFSTEMNING: Hvem er mest sandsynlig til at gifte sig med sin nabo? Personen med flest stemmer drikker {drinks}.', drinks: 3 },
+  { type: 'vote', cat: '🗳️ AFSTEMNING', text: 'AFSTEMNING: Hvem vil ALDRIG stoppe med at fortælle om sit arbejde? Flest stemmer = {drinks} slurke.', drinks: 2 },
+  { type: 'vote', cat: '🗳️ AFSTEMNING', text: 'AFSTEMNING: Hvem har de mest drama i deres liv lige nu? Personen med flest stemmer deler ét drama og drikker {drinks}.', drinks: 2 },
+  { type: 'vote', cat: '🗳️ AFSTEMNING', text: 'AFSTEMNING: Hvem er mest sandsynlig til at græde til en reklamekort? Vinder drikker {drinks}. Og vi forstår godt.', drinks: 2 },
+  { type: 'vote', cat: '🗳️ AFSTEMNING', text: 'AFSTEMNING: Hvem har den bedste undskyldning for altid at komme for sent? Taberen drikker {drinks}. Vinderen også – det hjalp ikke.', drinks: 2 },
+
+  // RULE
+  { type: 'rule', cat: '📜 NY REGEL', text: 'NY REGEL: Ingen må bruge sit navn resten af spillet. Siger du dit navn? {drinks} slurke.', drinks: 2, rule: '🚫 Ingen må sige eget navn' },
+  { type: 'rule', cat: '📜 NY REGEL', text: 'NY REGEL: Alle der drikker skal sige "Skål min ven" eller drikke dobbelt.', drinks: 0, rule: '🍻 Skål min ven – eller dobbelt' },
+  { type: 'rule', cat: '📜 NY REGEL', text: 'NY REGEL: Alle svar skal slutte med "...og det er fakta." Glemmer man det? {drinks} slurke.', drinks: 2, rule: '📢 Alle svar slutter med "...og det er fakta"' },
+  { type: 'rule', cat: '📜 NY REGEL', text: 'NY REGEL: Ingen peger med fingrene. Brug albuen. Glemmer man? {drinks} slurke.', drinks: 2, rule: '☝️ Peg kun med albuen' },
+  { type: 'rule', cat: '📜 NY REGEL', text: 'NY REGEL: Ingen svarer med "ja" eller "nej". Kun "absolut" eller "aldrig". Fejl = {drinks}.', drinks: 2, rule: '"Absolut" eller "Aldrig" – ikke ja/nej' },
+
+  // PUNISHMENT
+  { type: 'punishment', cat: '💀 STRAF', text: '{player} har synden: De skal afsløre den dyreste ting de har købt uden at fortælle nogen om det. Skammer sig de? {drinks} ekstra.', drinks: 2 },
+  { type: 'punishment', cat: '💀 STRAF', text: '{player}: Vis din seneste note i telefon. Pinlig? Drik {drinks}. Ikke pinlig? Gruppen beslutter.', drinks: 2 },
+];
+
+const hotKort = [
+  { type: 'challenge', cat: '🔥 HED UDFORDRING', text: '{player}: Ranger alle i rummet fra "mest til mindst attraktiv." Tøver? {drinks} slurke. Snyder med rækkefølgen? Alle kan se det på dit ansigt.', drinks: 3 },
+  { type: 'challenge', cat: '🔥 HED UDFORDRING', text: '{player} skal sende en flirtende besked til sin sidst chattede kontakt. Ja = fri. Nej = {drinks}.', drinks: 4 },
+  { type: 'dare', cat: '💋 TØR DU', text: '{player} og {player2} bytter telefoner i 2 minutter. Ingen sletter noget.', drinks: 0 },
+  { type: 'dare', cat: '💋 TØR DU', text: '{player}: Kys hånden på personen til din venstre. Nægter? {drinks}. Gør du det? {player2} drikker {drinks} af nervøsitet.', drinks: 2 },
+  { type: 'truth', cat: '🔍 GRÆNSER', text: '{player}: Hvad er den dummeste grund du har brudt op med nogen, eller nogen har brudt op med dig?', drinks: 0 },
+  { type: 'truth', cat: '🔍 GRÆNSER', text: '{player}: Har du nogensinde haft følelser for nogen i rummet? Svar sandfærdigt. Nej uden overbevisning = {drinks}.', drinks: 3 },
+  { type: 'vote', cat: '🗳️ HED AFSTEMNING', text: 'Hvem i gruppen ville klare sig bedst som model? Vinderen vælger hvem der drikker {drinks}.', drinks: 3 },
+  { type: 'vote', cat: '🗳️ HED AFSTEMNING', text: 'Hvem er mest sandsynlig til at have et hemmeligt knus-venskab med en kollega? Flest stemmer = {drinks} + sandhed.', drinks: 2 },
+  { type: 'punishment', cat: '💀 HED STRAF', text: '{player}: Vis din mest pinlige foto fra 2+ år tilbage. Nægter? {drinks}. Viser du den? Gruppen bestemmer om du drikker alligevel.', drinks: 3 },
+  { type: 'challenge', cat: '🔥 HED UDFORDRING', text: 'Alle tilstår det vildeste de har gjort til et fest. Den mest vildt drikker IKKE – de er vores helt. Den kedeligste drikker {drinks}.', drinks: 3 },
+  { type: 'dare', cat: '💋 TØR DU', text: '{player} laver sin bedste forføreriske dans i 10 sekunder. Under 50% crowd approval = {drinks}.', drinks: 2 },
+  { type: 'truth', cat: '🔍 GRÆNSER', text: '{player}: Beskriv din "type" i 5 ord. Alle gætter hvem i rummet der matcher bedst.', drinks: 0 },
+  { type: 'punishment', cat: '💀 HED STRAF', text: '{player}: Hvad er din mest skjulte app på telefonen? Vis ikonet. Ikke mere.', drinks: 0 },
+  { type: 'challenge', cat: '🔥 HED UDFORDRING', text: 'Speed round: {player} har 30 sek til at liste 5 ting de finder attraktivt. Tøver? {drinks} for hvert manglende svar.', drinks: 1 },
+];
+
+const spionKort = [
+  { type: 'truth', cat: '🕵️ AFSLØRING', text: '{player}: Hvad er den største hemmelighed du ved om en person i rummet – uden at nævne navn? Alle gætter hvem.', drinks: 0 },
+  { type: 'truth', cat: '🕵️ AFSLØRING', text: '{player}: Hvornår har du sidst løjet for gruppen – og hvad løj du om? Troværdigt svar eller {drinks}.', drinks: 3 },
+  { type: 'challenge', cat: '🕵️ SPION OPGAVE', text: 'SPIONRUNDE: {player} forlader rummet. De andre vælger en "ting" som er forbudt at sige. {player} vender tilbage og prøver at få alle til at sige det.', drinks: 0 },
+  { type: 'challenge', cat: '🕵️ SPION OPGAVE', text: 'DOBBELT AGENT: {player} skriver en hemmelighed om sig selv på en lap (eller note). Ingen må se den. Gruppen stiller ja/nej spørgsmål. Gætter de rigtigt? {player} drikker {drinks}.', drinks: 3 },
+  { type: 'vote', cat: '🕵️ EFTERRETNING', text: 'AFSTEMNING I HEMMELIGHED: Alle skriver hvem i gruppen de tror har flest hemmeligheder. Reveal! Personen med flest stemmer deler én. Drikker {drinks} for hvert minut de tøver.', drinks: 1 },
+  { type: 'dare', cat: '🕵️ MISSION', text: '{player} sender en anonym besked til den person i gruppen de kender mindst godt. En sand observation. Ingen må vide hvem der sendte.', drinks: 0 },
+  { type: 'rule', cat: '📜 SPIONLOV', text: 'NY SPIONLOV: Én af spillerne er hemmelig "dobbelt agent". De vælges nu i hemmelighed og skal sabotere spillet subtilt. Afsløres de? De drikker {drinks}. Afsløres de ikke? Alle andre drikker.', drinks: 3, rule: '🕵️ Dobbelt agent er aktiv – pas på!' },
+  { type: 'punishment', cat: '🕵️ AFKLARING', text: '{player}: Du er mistænkt. Gruppen stiller dig 3 ja/nej spørgsmål om din fortid. Lyver du? Vi kan lugte det. {drinks} for hvert løgn.', drinks: 2 },
+  { type: 'truth', cat: '🕵️ AFSLØRING', text: 'GRUPPEAFSLØRING: Alle skriver på papir hvad de tror {player} aldrig har fortalt nogen. Højtlæs. {player} bekræfter/afviser. Rigtigt gættet = {player} drikker {drinks}.', drinks: 3 },
+];
+
+const kaosKort = [
+  { type: 'punishment', cat: '💀 RENT KAOS', text: '{player} vælger en "straf-buddy". Alt hvad {player} drikker, drikker straf-buddy det dobbelte af. Varer til næste kaos-kort.', drinks: 0 },
+  { type: 'challenge', cat: '💀 RENT KAOS', text: 'CHAOS FLIP: Slå en mønt (eller lad en flippe telefonen). Plat? {player} uddeler {drinks} slurke frit. Krone? {player} drikker {drinks} selv.', drinks: 4 },
+  { type: 'dare', cat: '💀 RENT KAOS', text: 'RUSSISK ROULETTE: Alle tager ét glas – ét er rent vand, resten er drikke. Ingen ved hvem der fik vand. Alle drikker på én gang.', drinks: 0 },
+  { type: 'vote', cat: '💀 ANARKI AFSTEMNING', text: 'DEMOKRATI ER DØD: Gruppen afstemmer om {player} skal gøre noget. Flest stemmer vinder. {player} kan ikke veto. De drikker {drinks} af princip.', drinks: 2 },
+  { type: 'rule', cat: '💀 KAOS-LOV', text: 'KAOS-LOV: Fra nu af bestemmes mængden af slurke ved at slå med en terning (1-6). Varer 5 runder.', drinks: 0, rule: '🎲 Terning bestemmer slurke (5 runder)' },
+  { type: 'challenge', cat: '💀 RENT KAOS', text: 'OMVENDT VERDEN: I den næste runde gælder alt omvendt. Straf = belønning. Belønning = straf. {player} er dommer.', drinks: 0 },
+  { type: 'punishment', cat: '💀 RENT KAOS', text: '{player} og {player2} skifter pladser for resten af spillet. De overtager hinandens straffe. Lykke til.', drinks: 0 },
+  { type: 'dare', cat: '💀 RENT KAOS', text: 'GRUPPE-STRAF: Alle drikker {drinks} på samme tid. Ingen undtagelser. Ikke engang den tørre.', drinks: 2 },
+  { type: 'challenge', cat: '💀 RENT KAOS', text: 'TIDSKAPSEL: {player} fortæller hvad de tror de laver om 5 år. Alle svarer om det lyder troværdigt. Under halvdelen tror det? {drinks} for selvbedrag.', drinks: 2 },
+  { type: 'punishment', cat: '💀 RENT KAOS', text: 'POWER MOVE: {player} vælger én person der er immune fra straf i den næste runde. OG én person der drikker dobbelt.', drinks: 0 },
+  { type: 'challenge', cat: '💀 RENT KAOS', text: 'SPEED ROUND: Alle siger hurtigst muligt et dyr der starter med deres initialer. Sidst afsted drikker {drinks}.', drinks: 3 },
+  { type: 'dare', cat: '💀 RENT KAOS', text: '{player} skal have sagt en sætning med alle de andre spilleres navne inden for 10 sekunder. Fejler? {drinks}. Klarer det? Alle andre drikker {drinks} af respekt.', drinks: 2 },
+];
+
+// ============================================================
+// GAME LOGIC
+// ============================================================
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showRules() {
+  document.getElementById('rules-overlay').classList.add('show');
+}
+
+function closeOverlay(e) {
+  if (e.target === e.currentTarget) {
+    e.currentTarget.classList.remove('show');
+  }
+}
+
+function selectMode(el, mode) {
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedMode = mode;
+}
+
+function addPlayerInput(name = '') {
+  const list = document.getElementById('player-list');
+  const row = document.createElement('div');
+  row.className = 'player-input-row';
+  row.innerHTML = `
+    <input class="player-tag" type="text" placeholder="Spillerens navn..." value="${name}" maxlength="20">
+    <button class="remove-btn" onclick="this.parentElement.remove()">✕</button>
+  `;
+  list.appendChild(row);
+  row.querySelector('input').focus();
+}
+
+// Pre-fill 4 players
+(function init() {
+  ['Player 1','Player 2','Player 3','Player 4'].forEach(n => addPlayerInput(n));
+})();
+
+function startGame() {
+  players = Array.from(document.querySelectorAll('.player-tag'))
+    .map(i => i.value.trim())
+    .filter(n => n.length > 0);
+
+  if (players.length < 2) { showToast('⚠️ Tilføj mindst 2 spillere!'); return; }
+
+  drinkTotals = {};
+  players.forEach(p => drinkTotals[p] = 0);
+  activeRules = [];
+  cardsPlayed = 0;
+  currentPlayerIndex = 0;
+  round = 1;
+
+  const modeNames = { klassisk:'KLASSISK', hot:'HOT HOT HOT', spion:'SPION', kaos:'FULDSTÆNDIG KAOS' };
+  document.getElementById('topbar-mode-label').textContent = modeNames[selectedMode] || 'KLASSISK';
+
+  updateTopbar();
+  showScreen('screen-game');
+  nextCard();
+}
+
+function getCardPool() {
+  const base = [...klassiskKort];
+  if (selectedMode === 'hot') return [...base, ...hotKort, ...hotKort];
+  if (selectedMode === 'spion') return [...base, ...spionKort, ...spionKort];
+  if (selectedMode === 'kaos') return [...base, ...kaosKort, ...kaosKort, ...kaosKort];
+  return base;
+}
+
+function nextCard() {
+  cardsPlayed++;
+  const pool = getCardPool();
+  const card = pool[Math.floor(Math.random() * pool.length)];
+
+  const player = players[currentPlayerIndex % players.length];
+  let otherPlayers = players.filter(p => p !== player);
+  const player2 = otherPlayers[Math.floor(Math.random() * otherPlayers.length)] || player;
+
+  let drinks = card.drinks;
+  // If chaos dice rule active, randomize drinks
+  if (activeRules.some(r => r.includes('Terning'))) {
+    drinks = Math.ceil(Math.random() * 6);
+  }
+
+  let text = card.text
+    .replace(/{player}/g, `<strong style="color:var(--gold)">${player}</strong>`)
+    .replace(/{player2}/g, `<strong style="color:var(--neon)">${player2}</strong>`)
+    .replace(/{drinks}/g, `<strong style="color:var(--accent)">${drinks}</strong>`);
+
+  if (drinks > 0) drinkTotals[player] = (drinkTotals[player] || 0) + drinks;
+  if (card.rule) {
+    if (!activeRules.includes(card.rule)) {
+      activeRules.push(card.rule);
+    }
+  }
+
+  const typeClass = `card-type-${card.type}`;
+  const drinksHTML = drinks > 0 ? `
+    <div class="card-drinks">
+      <span class="drinks-label">SLURKE</span>
+      <div class="drinks-count">🍺 ${drinks}</div>
+    </div>
+  ` : '';
+
+  document.getElementById('card-area').innerHTML = `
+    <div class="game-card ${typeClass}">
+      <div class="card-stripe"></div>
+      <div class="card-category">${card.cat}</div>
+      <div class="card-player" style="color:var(--gold)">${player}</div>
+      <div class="card-text">${text}</div>
+      ${drinksHTML}
+    </div>
+  `;
+
+  currentPlayerIndex++;
+  if (currentPlayerIndex % players.length === 0) round++;
+
+  updateTopbar();
+
+  // Intensity increases over time
+  const intensity = Math.min(95, Math.floor((cardsPlayed / 30) * 100));
+  document.getElementById('intensity-fill').style.width = intensity + '%';
+}
+
+function updateTopbar() {
+  const container = document.getElementById('topbar-players');
+  container.innerHTML = players.map((p, i) => {
+    const active = (i === (currentPlayerIndex % players.length));
+    return `<div class="player-chip ${active ? 'active' : ''}">${p.length > 7 ? p.slice(0,7)+'…' : p}</div>`;
+  }).join('');
+  document.getElementById('topbar-round').textContent = `RND ${round}`;
+}
+
+function showActiveRules() {
+  const display = document.getElementById('active-rules-display');
+  if (activeRules.length === 0) {
+    display.innerHTML = '<p style="color:var(--muted)">Ingen aktive regler endnu.</p>';
+  } else {
+    display.innerHTML = `<div class="active-rules-list">${activeRules.map((r, i) =>
+      `<div class="active-rule-item">${r}<button class="remove-rule-btn" onclick="removeRule(${i})">✕</button></div>`
+    ).join('')}</div>`;
+  }
+  document.getElementById('rules-active-overlay').classList.add('show');
+}
+
+function removeRule(i) {
+  activeRules.splice(i, 1);
+  showActiveRules();
+}
+
+function confirmEnd() {
+  if (confirm('Er I sikre på I vil afslutte? (Husk at I alle tabte.)')) endGame();
+}
+
+function endGame() {
+  // Stats
+  const totalDrinks = Object.values(drinkTotals).reduce((a, b) => a + b, 0);
+  const maxDrinker = Object.entries(drinkTotals).sort((a,b) => b[1]-a[1])[0];
+  const minDrinker = Object.entries(drinkTotals).sort((a,b) => a[1]-b[1])[0];
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-box"><div class="stat-value">${cardsPlayed}</div><div class="stat-label">Kort spillet</div></div>
+    <div class="stat-box"><div class="stat-value">${totalDrinks}</div><div class="stat-label">Samlede slurke</div></div>
+    <div class="stat-box"><div class="stat-value">${round}</div><div class="stat-label">Runder</div></div>
+    <div class="stat-box"><div class="stat-value">${activeRules.length}</div><div class="stat-label">Aktive regler</div></div>
+  `;
+
+  document.getElementById('winner-box').innerHTML = `
+    <div class="winner-label">🏆 MEST DRIKKE</div>
+    <div class="winner-name">${maxDrinker ? maxDrinker[0] : '?'}</div>
+    <div class="winner-desc">${maxDrinker ? maxDrinker[1] : 0} slurke – ægte champ 🍺</div>
+    ${minDrinker && minDrinker[0] !== maxDrinker[0] ? `<hr style="border-color:#2a2a2a; margin:12px 0;">
+    <div class="winner-label" style="color:var(--muted)">🐔 MINDST DRIKKE</div>
+    <div class="winner-name" style="font-size:28px; color:var(--muted)">${minDrinker[0]}</div>
+    <div class="winner-desc">${minDrinker[1]} slurke – kylling.</div>` : ''}
+  `;
+
+  showScreen('screen-end');
+}
+
+function restartSame() {
+  drinkTotals = {};
+  players.forEach(p => drinkTotals[p] = 0);
+  activeRules = [];
+  cardsPlayed = 0;
+  currentPlayerIndex = 0;
+  round = 1;
+  updateTopbar();
+  showScreen('screen-game');
+  nextCard();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
